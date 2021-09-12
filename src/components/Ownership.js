@@ -43,7 +43,7 @@ class Ownership extends Component {
     retrieveH1Portals()
       .then((h1Portals) => {
         retrieveH2Portals()
-          .then((h2Portals) => {
+          .then(async (h2Portals) => {
             let h1UniqueOwners = {};
             let h2UniqueOwners = {};
             let allUniqueOwners = {};
@@ -144,40 +144,35 @@ class Ownership extends Component {
             this.setState({ h1Portals, h2Portals, owners, loading: false });
 
             let addresses = Object.keys(allUniqueOwners);
-            // this.stakingContract.methods.bulkFrens(Object.keys(allUniqueOwners)).call()
-            let addresses1 = addresses.slice(0, 101);
-            addresses1.push('0x26cf02f892b04af4cf350539ce2c77fcf79ec172');
-            let addresses2 = addresses.slice(101, 151);
-            let addresses3 = addresses.slice(151, 201); //addresses.length+1);
+            let addressList = [];
+            let promisesList = [];
+            let delta = 100;
 
-            console.log('bulk frens for', addresses1);
-            this.stakingContract.methods.bulkFrens(addresses1).call()
-              .then((frens1) => {
-                console.log('bulk frens for', addresses2);
-                this.stakingContract.methods.bulkFrens(addresses2).call()
-                  .then((frens2) => {
-                    this.stakingContract.methods.bulkFrens(addresses3).call()
-                      .then((frens3) => {
-                        let frens = {};
+            for (let start = 0; start < addresses.length; start += delta) {
+              let end = Math.min(addresses.length + 1, start + delta);
 
-                        for (var i = 0; i < addresses1.length; i++) {
-                          frens[addresses1[i]] = parseInt(ethers.utils.formatEther(frens1[i]));
-                        }
+              let a = addresses.slice(start, end);
+              addressList.push(a);
 
-                        for (var i = 0; i < addresses2.length; i++) {
-                          frens[addresses2[i]] = parseInt(ethers.utils.formatEther(frens2[i]));
-                        }
+              let p = await this.stakingContract.methods.bulkFrens(a).call();
+              promisesList.push(p);
+            }
 
-                        for (var i = 0; i < addresses3.length; i++) {
-                          frens[addresses3[i]] = parseInt(ethers.utils.formatEther(frens3[i]));
-                        }
-
-                        console.log('frens');
-
-                        this.setState({ frens });
-                      });
-                  });
-              });
+            const _this = this;
+            Promise.all([promisesList]).then((values) => {
+              console.log('promise all', values);
+              let frens = {};
+              for (var v = 0; v < values[0].length; v++) {
+                console.log(v, values[0][v]);
+                for (var i = 0; i < addressList[v].length; i++) {
+                  let address = addressList[v][i];
+                  var f = values[0][v][i];
+                  frens[address] = parseInt(ethers.utils.formatEther(f));
+                }
+              }
+              console.log('frens', frens);
+              _this.setState({ frens });
+            });
 
           });
       });
