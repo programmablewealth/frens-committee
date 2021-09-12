@@ -204,7 +204,6 @@ class Ownership extends Component {
 
       return (
         <div>
-          <h2>Top Owners</h2>
           <div style={{ height: '1080px', width: '100%' }}>
             <DataGrid rows={this.state.owners} columns={columns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
@@ -220,7 +219,7 @@ class Ownership extends Component {
   render() {
     return(
       <div>
-        <h1>Aavegotchi Ownership Statistics</h1>
+        <h2>Portal Owner's Fren Balances</h2>
         {this.renderOwners()}
       </div>
     )

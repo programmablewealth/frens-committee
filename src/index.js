@@ -11,9 +11,12 @@ require('dotenv').config();
 
 ReactDOM.render(
   <React.StrictMode>
+    <div>
+    <h1>Aavegotchi Frens Committee Analytics</h1>
     <TokenPrices />
     <FrensRates />
     <Ownership />
+    </div>
   </React.StrictMode>,
   document.getElementById('root')
 );

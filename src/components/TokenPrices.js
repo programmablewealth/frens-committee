@@ -78,7 +78,7 @@ class TokenPrices extends Component {
   render() {
     return(
       <div>
-        <h1>Token Prices</h1>
+        <h2>Token Prices</h2>
         {this.renderTokenPrices()}
       </div>
     );

@@ -61,8 +61,7 @@ class FrensRates extends Component {
 
       return (
         <div>
-          <h2>Rates</h2>
-          <div style={{ height: '1080px', width: '100%' }}>
+          <div style={{ height: '300px', width: '100%' }}>
             <DataGrid rows={rows} columns={columns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
         </div>
@@ -77,7 +76,7 @@ class FrensRates extends Component {
   render() {
     return(
       <div>
-        <h1>Current Rates</h1>
+        <h2>Current Frens Rates</h2>
         {this.renderRates()}
       </div>
     )
