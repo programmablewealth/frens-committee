@@ -163,14 +163,12 @@ class Ownership extends Component {
               console.log('promise all', values);
               let frens = {};
               for (var v = 0; v < values[0].length; v++) {
-                console.log(v, values[0][v]);
                 for (var i = 0; i < addressList[v].length; i++) {
                   let address = addressList[v][i];
                   var f = values[0][v][i];
                   frens[address] = parseInt(ethers.utils.formatEther(f));
                 }
               }
-              console.log('frens', frens);
               _this.setState({ frens });
             });
 
