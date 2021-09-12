@@ -52,8 +52,9 @@ class TokenPrices extends Component {
       let tokenPrices = this.state.tokens.map(function(token, index){
         let mappedToken = this.state.tokenMapping[token];
         let price = this.state.prices[mappedToken];
+        let priceInGhst = parseFloat((price.usd/this.state.prices.aavegotchi.usd).toFixed(2));
         return(
-          <li key={`token-price-${token}`}>{token}: {price.usd} USD</li>
+          <li key={`token-price-${token}`}>{token}: {price.usd} USD, {priceInGhst} GHST</li>
         );
       }, this);
 
