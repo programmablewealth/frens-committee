@@ -4,6 +4,7 @@ import './index.css';
 import reportWebVitals from './reportWebVitals';
 
 import TokenPrices from './components/TokenPrices';
+import FrensRates from './components/FrensRates';
 import Ownership from './components/Ownership';
 
 require('dotenv').config();
@@ -11,6 +12,7 @@ require('dotenv').config();
 ReactDOM.render(
   <React.StrictMode>
     <TokenPrices />
+    <FrensRates />
     <Ownership />
   </React.StrictMode>,
   document.getElementById('root')
