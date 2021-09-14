@@ -146,7 +146,7 @@ class Ownership extends Component {
             let addresses = Object.keys(allUniqueOwners);
             let addressList = [];
             let promisesList = [];
-            let delta = 100;
+            let delta = 80;
 
             for (let start = 0; start < addresses.length; start += delta) {
               let end = Math.min(addresses.length + 1, start + delta);
