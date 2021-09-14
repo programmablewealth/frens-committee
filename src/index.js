@@ -7,16 +7,36 @@ import TokenPrices from './components/TokenPrices';
 import FrensRates from './components/FrensRates';
 import Ownership from './components/Ownership';
 
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from 'react-router-dom';
+
 require('dotenv').config();
 
 ReactDOM.render(
   <React.StrictMode>
-    <div>
-    <h1>Aavegotchi Frens Committee Analytics</h1>
-    <TokenPrices />
-    <FrensRates />
-    <Ownership />
-    </div>
+    <Router>
+      <div>
+        <h1>Aavegotchi Frens Committee Analytics</h1>
+        <div>
+          <a href="/">Frens Rates</a> <a href="/supply">Frens Supply</a>
+        </div>
+        <Switch>
+          <Route path="/supply">
+            <Ownership />
+          </Route>
+
+          <Route path="/">
+            <div>
+              <TokenPrices />
+              <FrensRates />
+            </div>
+          </Route>
+        </Switch>
+      </div>
+    </Router>
   </React.StrictMode>,
   document.getElementById('root')
 );
