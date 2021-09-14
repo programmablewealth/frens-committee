@@ -211,7 +211,7 @@ class Ownership extends Component {
       );
     } else {
       return (
-        <p>Loading portals and frens balances...</p>
+        <p>Loading portals and FRENS balances...</p>
       );
     }
   }
@@ -219,7 +219,8 @@ class Ownership extends Component {
   render() {
     return(
       <div>
-        <h2>Portal Owner's Fren Balances</h2>
+        <h2>Portal Owner's FRENS Balances</h2>
+        <p>Note: this table only shows FRENS balances for addresses with at least one Aavegotchi or portal.</p>
         {this.renderOwners()}
       </div>
     )
