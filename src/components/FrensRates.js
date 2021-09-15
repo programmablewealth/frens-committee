@@ -5,6 +5,7 @@ import { DataGrid } from '@material-ui/data-grid';
 import aavegotchiContractAbi from '../abi/diamond.json';
 import ghstStakingContractAbi from '../abi/StakingFacet.json';
 import uniswapV2PairAbi from '../abi/UniswapV2Pair.json';
+import ghstAbi from '../abi/ghst.json';
 import { connectToMatic } from '../util/MaticClient';
 
 import { ethers } from "ethers";
@@ -28,9 +29,12 @@ class FrensRates extends Component {
     this.ghstUsdcPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4');
     this.ghstWethPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0xccb9d2100037f1253e6c1682adf7dc9944498aff');
 
+    this.ghstContract = new maticPOSClient.web3Client.web3.eth.Contract(ghstAbi, '0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7');
+
     console.log(this.aavegotchiContract);
     console.log(this.stakingContract);
     console.log(this.ghstQuickPairContract, this.ghstUsdcPairContract, this.ghstWethPairContract);
+    console.log(this.ghstContract);
   }
 
   async componentDidMount() {
@@ -47,10 +51,13 @@ class FrensRates extends Component {
     let ghstWethReserves = await this.ghstWethPairContract.methods.getReserves().call();
     let ghstWethSupply = await this.ghstWethPairContract.methods.totalSupply().call();
 
+    let ghstStaked = await this.ghstContract.methods.balanceOf('0xa02d547512bb90002807499f05495fe9c4c3943f').call();
+
     console.log(ghstWethRate, ghstUsdcRate, ghstQuickRate);
     console.log(ghstQuickReserves, ghstUsdcReserves, ghstWethReserves);
+    console.log(ghstStaked);
 
-    this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply } });
+    this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked } });
   }
 
   renderRates() {
@@ -67,11 +74,11 @@ class FrensRates extends Component {
           )
         },
         {
-          field: 'pair',
-          headerName: 'Pair',
+          field: 'contract',
+          headerName: 'Contract',
           width: 160,
           renderCell: (params: GridCellParams) => (
-            <a href={`https://info.quickswap.exchange/pair/${params.value}`} target="_blank">
+            <a href={`${params.value}`} target="_blank">
               {params.value}
             </a>
           )
@@ -84,6 +91,8 @@ class FrensRates extends Component {
         { field: 'realFrensRate', headerName: 'Real FRENS Rate', width: 220 },
         { field: 'targetFrensRate', headerName: 'Target FRENS Rate', width: 220 },
         { field: 'modifiedRewards', headerName: 'Modified FRENS', width: 180 },
+        { field: 'currentEmissions', headerName: 'Current Daily FRENS Emissions', width: 240 },
+        { field: 'modifiedEmissions', headerName: 'Modified Daily FRENS Emissions', width: 240 },
       ];
 
       let rows = [];
@@ -92,18 +101,33 @@ class FrensRates extends Component {
       let realFrensRate = 0;
       let targetFrensRate = 0;
       let modifiedRewards = 0;
+      let currentEmissions = 0;
+      let modifiedEmissions = 0;
 
-      rows.push({ id: 'GHST', currentRewards: this.state.rates.ghstRate });
+      rows.push({
+        id: 'GHST',
+        contract: 'https://polygonscan.com/address/0xa02d547512bb90002807499f05495fe9c4c3943f',
+        currentRewards: this.state.rates.ghstRate,
+        reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstStaked)).toLocaleString(),
+        ghstPerUnit: 1,
+        realFrensRate: (1).toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
+        targetFrensRate: (1).toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
+        modifiedRewards: (1).toLocaleString(),
+        currentEmissions: parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked)).toLocaleString(),
+        modifiedEmissions: parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked)).toLocaleString()
+      });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstQuickSupply));
       ghstPerUnit = (parseFloat(ethers.utils.formatEther(this.state.rates.ghstQuickReserves._reserve0)) * 2) / totalSupply;
       realFrensRate = parseFloat(this.state.rates.ghstQuickRate) / ghstPerUnit;
       targetFrensRate = 1.35;
       modifiedRewards = targetFrensRate * ghstPerUnit;
+      currentEmissions = totalSupply * parseFloat(this.state.rates.ghstQuickRate);
+      modifiedEmissions = totalSupply * modifiedRewards;
 
       rows.push({
         id: 'GHST QUICK LP',
-        pair: '0x8b1fd78ad67c7da09b682c5392b65ca7caa101b9',
+        contract: 'https://info.quickswap.exchange/pair/0x8b1fd78ad67c7da09b682c5392b65ca7caa101b9',
         currentRewards: parseFloat(this.state.rates.ghstQuickRate).toLocaleString(),
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstQuickReserves._reserve0)).toLocaleString(),
         reserve2: parseFloat(ethers.utils.formatEther(this.state.rates.ghstQuickReserves._reserve1)).toLocaleString(),
@@ -112,6 +136,8 @@ class FrensRates extends Component {
         realFrensRate: realFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
         targetFrensRate: targetFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
         modifiedRewards: modifiedRewards.toLocaleString(),
+        currentEmissions: parseInt(currentEmissions).toLocaleString(),
+        modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstUsdcSupply));
@@ -119,10 +145,12 @@ class FrensRates extends Component {
       realFrensRate = parseFloat(this.state.rates.ghstUsdcRate) / ghstPerUnit;
       targetFrensRate = 1.1;
       modifiedRewards = targetFrensRate * ghstPerUnit;
+      currentEmissions = totalSupply * parseFloat(this.state.rates.ghstUsdcRate);
+      modifiedEmissions = totalSupply * modifiedRewards;
 
       rows.push({
         id: 'GHST USDC LP',
-        pair: '0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4',
+        contract: 'https://info.quickswap.exchange/pair/0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4',
         currentRewards: parseFloat(this.state.rates.ghstUsdcRate).toLocaleString(),
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstUsdcReserves._reserve1)).toLocaleString(),
         reserve2: parseFloat(ethers.utils.formatUnits(this.state.rates.ghstUsdcReserves._reserve0, 'mwei')).toLocaleString(),
@@ -131,6 +159,8 @@ class FrensRates extends Component {
         realFrensRate: realFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
         targetFrensRate: targetFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
         modifiedRewards: modifiedRewards.toLocaleString(),
+        currentEmissions: parseInt(currentEmissions).toLocaleString(),
+        modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstWethSupply));
@@ -138,10 +168,12 @@ class FrensRates extends Component {
       realFrensRate = parseFloat(this.state.rates.ghstWethRate) / ghstPerUnit;
       targetFrensRate = 1.2;
       modifiedRewards = targetFrensRate * ghstPerUnit;
+      currentEmissions = totalSupply * parseFloat(this.state.rates.ghstWethRate);
+      modifiedEmissions = totalSupply * modifiedRewards;
 
       rows.push({
         id: 'GHST WETH LP',
-        pair: '0xccb9d2100037f1253e6c1682adf7dc9944498aff',
+        contract: 'https://info.quickswap.exchange/pair/0xccb9d2100037f1253e6c1682adf7dc9944498aff',
         currentRewards: parseFloat(this.state.rates.ghstWethRate).toLocaleString(),
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstWethReserves._reserve0)).toLocaleString(),
         reserve2: parseFloat(ethers.utils.formatEther(this.state.rates.ghstWethReserves._reserve1)).toLocaleString(),
@@ -150,6 +182,8 @@ class FrensRates extends Component {
         realFrensRate: realFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
         targetFrensRate: targetFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
         modifiedRewards: modifiedRewards.toLocaleString(),
+        currentEmissions: parseInt(currentEmissions).toLocaleString(),
+        modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
       });
 
       return (
