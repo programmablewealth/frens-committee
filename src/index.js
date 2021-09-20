@@ -19,7 +19,7 @@ ReactDOM.render(
   <React.StrictMode>
     <Router>
       <div>
-        <h1>Aavegotchi Frens Committee Analytics</h1>
+        <h1>Aavegotchi Frens Taaskforce Analytics</h1>
         <div>
           <a href="/">Frens Rates</a> <a href="/supply">Frens Supply</a>
         </div>
