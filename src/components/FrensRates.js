@@ -33,6 +33,7 @@ class FrensRates extends Component {
     this.ghstQuickPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0x8b1fd78ad67c7da09b682c5392b65ca7caa101b9');
     this.ghstUsdcPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4');
     this.ghstWethPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0xccb9d2100037f1253e6c1682adf7dc9944498aff');
+    this.ghstMaticPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0xf69e93771f11aecd8e554aa165c3fe7fd811530c');
 
     this.uniswapGHSTEthPairContract = new ethers.Contract('0xab659dee3030602c1af8c29d146facd4aed6ec85', uniswapV2PairAbi, ethProvider);
 
@@ -44,7 +45,7 @@ class FrensRates extends Component {
     console.log(this.ghstContract);
 
     console.log('uniswap', this.uniswapGHSTEthPairContract);
-
+    console.log('sushiswap', this.ghstMaticPairContract);
   }
 
   async componentDidMount() {
@@ -66,12 +67,15 @@ class FrensRates extends Component {
     let ghstEthUniswapReserves = await this.uniswapGHSTEthPairContract.getReserves();
     let ghstEthUniswapSupply = await this.uniswapGHSTEthPairContract.totalSupply();
 
+    let ghstMaticReserves = await this.ghstMaticPairContract.methods.getReserves().call();
+    let ghstMaticSupply = await this.ghstMaticPairContract.methods.totalSupply().call();
+
     console.log(ghstWethRate, ghstUsdcRate, ghstQuickRate);
     console.log(ghstQuickReserves, ghstUsdcReserves, ghstWethReserves);
     console.log(ghstStaked);
     console.log('uniswap', 'reserves', ghstEthUniswapReserves, 'supply', ghstEthUniswapSupply);
 
-    this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked, ghstEthUniswapReserves, ghstEthUniswapSupply } });
+    this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked, ghstEthUniswapReserves, ghstEthUniswapSupply, ghstMaticReserves, ghstMaticSupply } });
   }
 
   renderRates() {
@@ -140,7 +144,7 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
 
       rows.push({
-        id: 'GHST QUICK LP',
+        id: 'QUICKSWAP GHST QUICK LP',
         contract: 'https://info.quickswap.exchange/pair/0x8b1fd78ad67c7da09b682c5392b65ca7caa101b9',
         currentRewards: parseFloat(this.state.rates.ghstQuickRate).toLocaleString(),
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstQuickReserves._reserve0)).toLocaleString(),
@@ -163,7 +167,7 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
 
       rows.push({
-        id: 'GHST USDC LP',
+        id: 'QUICKSWAP GHST USDC LP',
         contract: 'https://info.quickswap.exchange/pair/0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4',
         currentRewards: parseFloat(this.state.rates.ghstUsdcRate).toLocaleString(),
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstUsdcReserves._reserve1)).toLocaleString(),
@@ -186,7 +190,7 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
 
       rows.push({
-        id: 'GHST WETH LP',
+        id: 'QUICKSWAP GHST WETH LP',
         contract: 'https://info.quickswap.exchange/pair/0xccb9d2100037f1253e6c1682adf7dc9944498aff',
         currentRewards: parseFloat(this.state.rates.ghstWethRate).toLocaleString(),
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstWethReserves._reserve0)).toLocaleString(),
@@ -198,6 +202,18 @@ class FrensRates extends Component {
         modifiedRewards: modifiedRewards.toLocaleString(),
         currentEmissions: parseInt(currentEmissions).toLocaleString(),
         modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
+      });
+
+      totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticSupply));
+      ghstPerUnit = (parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve1)) * 2) / totalSupply;
+
+      rows.push({
+        id: 'SUSHISWAP GHST MATIC LP',
+        contract: 'https://analytics-polygon.sushi.com/pairs/0xf69e93771f11aecd8e554aa165c3fe7fd811530c',
+        reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve1)).toLocaleString(),
+        reserve2: parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve0)).toLocaleString(),
+        totalSupply: totalSupply.toLocaleString(),
+        ghstPerUnit: ghstPerUnit.toLocaleString(),
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstEthUniswapSupply));
@@ -215,7 +231,7 @@ class FrensRates extends Component {
 
       return (
         <div>
-          <div style={{ height: '300px', width: '100%' }}>
+          <div style={{ height: '400px', width: '100%' }}>
             <DataGrid rows={rows} columns={columns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
         </div>
