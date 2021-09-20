@@ -35,6 +35,10 @@ ReactDOM.render(
             </div>
           </Route>
         </Switch>
+
+        <div>
+          <a href="https://github.com/programmablewealth/frens-committee">source code</a>
+        </div>
       </div>
     </Router>
   </React.StrictMode>,
