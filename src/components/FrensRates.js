@@ -7,6 +7,7 @@ import ghstStakingContractAbi from '../abi/StakingFacet.json';
 import uniswapV2PairAbi from '../abi/UniswapV2Pair.json';
 import ghstAbi from '../abi/ghst.json';
 import { connectToMatic } from '../util/MaticClient';
+import { connectToEth } from '../util/EthClient';
 
 import { ethers } from "ethers";
 
@@ -22,6 +23,10 @@ class FrensRates extends Component {
     };
 
     const maticPOSClient = connectToMatic();
+    const ethProvider = connectToEth();
+
+    console.log('ethProvider', ethProvider);
+
     this.aavegotchiContract = new maticPOSClient.web3Client.web3.eth.Contract(aavegotchiContractAbi, '0x86935F11C86623deC8a25696E1C19a8659CbF95d');
     this.stakingContract = new maticPOSClient.web3Client.web3.eth.Contract(ghstStakingContractAbi, '0xA02d547512Bb90002807499F05495Fe9C4C3943f');
 
@@ -29,12 +34,17 @@ class FrensRates extends Component {
     this.ghstUsdcPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0x096c5ccb33cfc5732bcd1f3195c13dbefc4c82f4');
     this.ghstWethPairContract = new maticPOSClient.web3Client.web3.eth.Contract(uniswapV2PairAbi, '0xccb9d2100037f1253e6c1682adf7dc9944498aff');
 
+    this.uniswapGHSTEthPairContract = new ethers.Contract('0xab659dee3030602c1af8c29d146facd4aed6ec85', uniswapV2PairAbi, ethProvider);
+
     this.ghstContract = new maticPOSClient.web3Client.web3.eth.Contract(ghstAbi, '0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7');
 
     console.log(this.aavegotchiContract);
     console.log(this.stakingContract);
     console.log(this.ghstQuickPairContract, this.ghstUsdcPairContract, this.ghstWethPairContract);
     console.log(this.ghstContract);
+
+    console.log('uniswap', this.uniswapGHSTEthPairContract);
+
   }
 
   async componentDidMount() {
@@ -53,11 +63,15 @@ class FrensRates extends Component {
 
     let ghstStaked = await this.ghstContract.methods.balanceOf('0xa02d547512bb90002807499f05495fe9c4c3943f').call();
 
+    let ghstEthUniswapReserves = await this.uniswapGHSTEthPairContract.getReserves();
+    let ghstEthUniswapSupply = await this.uniswapGHSTEthPairContract.totalSupply();
+
     console.log(ghstWethRate, ghstUsdcRate, ghstQuickRate);
     console.log(ghstQuickReserves, ghstUsdcReserves, ghstWethReserves);
     console.log(ghstStaked);
+    console.log('uniswap', 'reserves', ghstEthUniswapReserves, 'supply', ghstEthUniswapSupply);
 
-    this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked } });
+    this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked, ghstEthUniswapReserves, ghstEthUniswapSupply } });
   }
 
   renderRates() {
@@ -184,6 +198,19 @@ class FrensRates extends Component {
         modifiedRewards: modifiedRewards.toLocaleString(),
         currentEmissions: parseInt(currentEmissions).toLocaleString(),
         modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
+      });
+
+      totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstEthUniswapSupply));
+      ghstPerUnit = (parseFloat(ethers.utils.formatEther(this.state.rates.ghstEthUniswapReserves._reserve0)) * 2) / totalSupply;
+
+      rows.push({
+        id: 'UNISWAP GHST WETH LP',
+        contract: 'https://v2.info.uniswap.org/pair/0xab659dee3030602c1af8c29d146facd4aed6ec85',
+        currentRewards: 0,
+        reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstEthUniswapReserves._reserve0)).toLocaleString(),
+        reserve2: parseFloat(ethers.utils.formatEther(this.state.rates.ghstEthUniswapReserves._reserve1)).toLocaleString(),
+        totalSupply: totalSupply.toLocaleString(),
+        ghstPerUnit: ghstPerUnit.toLocaleString(),
       });
 
       return (
