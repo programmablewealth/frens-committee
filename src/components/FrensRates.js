@@ -210,6 +210,7 @@ class FrensRates extends Component {
       rows.push({
         id: 'SUSHISWAP GHST MATIC LP',
         contract: 'https://analytics-polygon.sushi.com/pairs/0xf69e93771f11aecd8e554aa165c3fe7fd811530c',
+        currentRewards: 0,
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve1)).toLocaleString(),
         reserve2: parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve0)).toLocaleString(),
         totalSupply: totalSupply.toLocaleString(),
