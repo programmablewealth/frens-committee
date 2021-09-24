@@ -11,6 +11,7 @@ import { connectToEth } from '../util/EthClient';
 
 
 import { frenPrice } from '../util/TicketUtil';
+import { fetchTokenPrices } from '../util/TokenPriceUtil';
 
 import { ethers } from "ethers";
 
@@ -81,11 +82,16 @@ class FrensRates extends Component {
     console.log(ghstStaked);
     console.log('uniswap', 'reserves', ghstEthUniswapReserves, 'supply', ghstEthUniswapSupply);
 
-    frenPrice()
-      .then((ghstFrenPrice) => {
-        console.log('ghstFrenPrice', ghstFrenPrice);
-        // let usdFrenPrice = ghstFrenPrice;
-        this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked, ghstEthUniswapReserves, ghstEthUniswapSupply, ghstMaticReserves, ghstMaticSupply, ghstFrenPrice } });
+    fetchTokenPrices(['GHST'])
+      .then((tokenPrices) => {
+        console.log('tokenPrices', tokenPrices);
+
+        frenPrice()
+          .then((ghstFrenPrice) => {
+            console.log('ghstFrenPrice', ghstFrenPrice);
+            // let usdFrenPrice = ghstFrenPrice;
+            this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked, ghstEthUniswapReserves, ghstEthUniswapSupply, ghstMaticReserves, ghstMaticSupply, ghstFrenPrice, tokenPrices } });
+          });
       });
   }
 
@@ -144,9 +150,11 @@ class FrensRates extends Component {
           )
         },
         { field: 'currentEmissions', headerName: 'Current FRENS Emissions', width: 260 },
-        { field: 'currentEmissionsGhst', headerName: 'Current FRENS Emissions (GHST)', width: 340 },
+        { field: 'currentEmissionsGhst', headerName: 'CFE (GHST)', width: 160 },
+        { field: 'currentEmissionsUsd', headerName: 'CFE (USD)', width: 160 },
         { field: 'modifiedEmissions', headerName: 'Modified FRENS Emissions', width: 260 },
-        { field: 'modifiedEmissionsGhst', headerName: 'Modified FRENS Emissions (GHST)', width: 340 },
+        { field: 'modifiedEmissionsGhst', headerName: 'MFE (GHST)', width: 160 },
+        { field: 'modifiedEmissionsUsd', headerName: 'MFE (USD)', width: 160 },
       ];
 
       let rows = [];
@@ -161,18 +169,24 @@ class FrensRates extends Component {
       let modifiedEmissions = 0;
       let currentEmissionsGhst = 0;
       let modifiedEmissionsGhst = 0;
+      let currentEmissionsUsd = 0;
+      let modifiedEmissionsUsd = 0;
 
       let cumulativeEmissions = {
         currentEmissions: 0,
         modifiedEmissions: 0,
         currentEmissionsGhst: 0,
         modifiedEmissionsGhst: 0,
+        currentEmissionsUsd: 0,
+        modifiedEmissionsUsd: 0,
       };
 
       currentEmissions = parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked));
       modifiedEmissions = currentEmissions;
-      currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
+      currentEmissionsGhst = parseInt(currentEmissions * this.state.rates.ghstFrenPrice);
       modifiedEmissionsGhst = currentEmissionsGhst;
+      currentEmissionsUsd = parseInt(currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      modifiedEmissionsUsd = parseInt(modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
       cumulativeEmissions.currentEmissions += currentEmissions;
       cumulativeEmissions.modifiedEmissions += modifiedEmissions;
       cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
@@ -195,7 +209,9 @@ class FrensRates extends Component {
         currentEmissions: currentEmissions.toLocaleString(),
         currentEmissionsGhst: currentEmissionsGhst.toLocaleString(),
         modifiedEmissions: modifiedEmissions.toLocaleString(),
-        modifiedEmissionsGhst: modifiedEmissionsGhst.toLocaleString()
+        modifiedEmissionsGhst: modifiedEmissionsGhst.toLocaleString(),
+        currentEmissionsUsd: currentEmissionsUsd.toLocaleString(),
+        modifiedEmissionsUsd: modifiedEmissionsUsd.toLocaleString()
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstQuickSupply));
@@ -207,6 +223,8 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
       currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
       modifiedEmissionsGhst = modifiedEmissions * this.state.rates.ghstFrenPrice;
+      currentEmissionsUsd = parseInt(currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      modifiedEmissionsUsd = parseInt(modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
       cumulativeEmissions.currentEmissions += currentEmissions;
       cumulativeEmissions.modifiedEmissions += modifiedEmissions;
       cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
@@ -232,6 +250,8 @@ class FrensRates extends Component {
         modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
         currentEmissionsGhst: parseInt(currentEmissionsGhst).toLocaleString(),
         modifiedEmissionsGhst: parseInt(modifiedEmissionsGhst).toLocaleString(),
+        currentEmissionsUsd: currentEmissionsUsd.toLocaleString(),
+        modifiedEmissionsUsd: modifiedEmissionsUsd.toLocaleString()
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstUsdcSupply));
@@ -243,6 +263,8 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
       currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
       modifiedEmissionsGhst = modifiedEmissions * this.state.rates.ghstFrenPrice;
+      currentEmissionsUsd = parseInt(currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      modifiedEmissionsUsd = parseInt(modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
       cumulativeEmissions.currentEmissions += currentEmissions;
       cumulativeEmissions.modifiedEmissions += modifiedEmissions;
       cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
@@ -268,6 +290,8 @@ class FrensRates extends Component {
         modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
         currentEmissionsGhst: parseInt(currentEmissionsGhst).toLocaleString(),
         modifiedEmissionsGhst: parseInt(modifiedEmissionsGhst).toLocaleString(),
+        currentEmissionsUsd: currentEmissionsUsd.toLocaleString(),
+        modifiedEmissionsUsd: modifiedEmissionsUsd.toLocaleString()
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstWethSupply));
@@ -279,10 +303,14 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
       currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
       modifiedEmissionsGhst = modifiedEmissions * this.state.rates.ghstFrenPrice;
+      currentEmissionsUsd = parseInt(currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      modifiedEmissionsUsd = parseInt(modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
       cumulativeEmissions.currentEmissions += currentEmissions;
       cumulativeEmissions.modifiedEmissions += modifiedEmissions;
       cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
       cumulativeEmissions.modifiedEmissionsGhst += modifiedEmissionsGhst;
+      cumulativeEmissions.currentEmissionsUsd = cumulativeEmissions.currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd;
+      cumulativeEmissions.modifiedEmissionsUsd = cumulativeEmissions.modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd;
 
       rows.push({
         id: 'QUICKSWAP GHST WETH LP',
@@ -304,6 +332,8 @@ class FrensRates extends Component {
         modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
         currentEmissionsGhst: parseInt(currentEmissionsGhst).toLocaleString(),
         modifiedEmissionsGhst: parseInt(modifiedEmissionsGhst).toLocaleString(),
+        currentEmissionsUsd: currentEmissionsUsd.toLocaleString(),
+        modifiedEmissionsUsd: modifiedEmissionsUsd.toLocaleString()
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticSupply));
@@ -340,16 +370,16 @@ class FrensRates extends Component {
           </div>
           <h2>Daily Emissions</h2>
           <p>FRENS Emissions are calculated in GHST by assuming the FRENS can be converted to tickets and sold at the current <a href='https://aavegotchistats.com/floor'>ticket floor price</a> of {(this.state.rates.ghstFrenPrice).toFixed(6)} GHST / fren</p>
-          <div style={{ height: '400px', width: '100%' }}>
+          <div style={{ height: '300px', width: '100%' }}>
             <DataGrid rows={emissionsRows} columns={emissionsColumns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
-          <p>Cumulative Current Daily Emissions: {parseInt(cumulativeEmissions.currentEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.currentEmissionsGhst).toLocaleString()} GHST</p>
-          <p>Cumulative Modified Daily Emissions: {parseInt(cumulativeEmissions.modifiedEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.modifiedEmissionsGhst).toLocaleString()} GHST</p>
+          <p>Cumulative Current Daily Emissions: {parseInt(cumulativeEmissions.currentEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.currentEmissionsGhst).toLocaleString()} GHST or {parseInt(cumulativeEmissions.currentEmissionsUsd).toLocaleString()} USD</p>
+          <p>Cumulative Modified Daily Emissions: {parseInt(cumulativeEmissions.modifiedEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.modifiedEmissionsGhst).toLocaleString()} GHST or {parseInt(cumulativeEmissions.modifiedEmissionsUsd).toLocaleString()} USD</p>
         </div>
       );
     } else {
       return (
-        <p>Loading portals and frens balances...</p>
+        <p>Loading staking balances from smart contracts...</p>
       );
     }
   }
