@@ -373,8 +373,8 @@ class FrensRates extends Component {
           <div style={{ height: '300px', width: '100%' }}>
             <DataGrid rows={emissionsRows} columns={emissionsColumns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
-          <p>Cumulative Current Daily Emissions: {parseInt(cumulativeEmissions.currentEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.currentEmissionsGhst).toLocaleString()} GHST or {parseInt(cumulativeEmissions.currentEmissionsUsd).toLocaleString()} USD</p>
-          <p>Cumulative Modified Daily Emissions: {parseInt(cumulativeEmissions.modifiedEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.modifiedEmissionsGhst).toLocaleString()} GHST or {parseInt(cumulativeEmissions.modifiedEmissionsUsd).toLocaleString()} USD</p>
+          <p>Total Current Daily Emissions: {parseInt(cumulativeEmissions.currentEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.currentEmissionsGhst).toLocaleString()} GHST or {parseInt(cumulativeEmissions.currentEmissionsUsd).toLocaleString()} USD</p>
+          <p>Total Modified Daily Emissions: {parseInt(cumulativeEmissions.modifiedEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.modifiedEmissionsGhst).toLocaleString()} GHST or {parseInt(cumulativeEmissions.modifiedEmissionsUsd).toLocaleString()} USD</p>
         </div>
       );
     } else {
