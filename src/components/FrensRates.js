@@ -95,7 +95,7 @@ class FrensRates extends Component {
         {
           field: 'id',
           headerName: 'Staking',
-          width: 160,
+          width: 200,
           renderCell: (params: GridCellParams) => (
             <a href={`https://aavegotchi.com/stake-polygon`} target="_blank">
               {params.value}
@@ -126,7 +126,7 @@ class FrensRates extends Component {
         {
           field: 'id',
           headerName: 'Staking',
-          width: 160,
+          width: 200,
           renderCell: (params: GridCellParams) => (
             <a href={`https://aavegotchi.com/stake-polygon`} target="_blank">
               {params.value}
@@ -143,10 +143,10 @@ class FrensRates extends Component {
             </a>
           )
         },
-        { field: 'currentEmissions', headerName: 'Current FRENS Emissions', width: 320 },
-        { field: 'currentEmissionsGhst', headerName: 'Current FRENS Emissions (GHST)', width: 320 },
-        { field: 'modifiedEmissions', headerName: 'Modified FRENS Emissions', width: 320 },
-        { field: 'modifiedEmissionsGhst', headerName: 'Modified FRENS Emissions (GHST)', width: 320 },
+        { field: 'currentEmissions', headerName: 'Current FRENS Emissions', width: 260 },
+        { field: 'currentEmissionsGhst', headerName: 'Current FRENS Emissions (GHST)', width: 340 },
+        { field: 'modifiedEmissions', headerName: 'Modified FRENS Emissions', width: 260 },
+        { field: 'modifiedEmissionsGhst', headerName: 'Modified FRENS Emissions (GHST)', width: 340 },
       ];
 
       let rows = [];
@@ -162,6 +162,22 @@ class FrensRates extends Component {
       let currentEmissionsGhst = 0;
       let modifiedEmissionsGhst = 0;
 
+      let cumulativeEmissions = {
+        currentEmissions: 0,
+        modifiedEmissions: 0,
+        currentEmissionsGhst: 0,
+        modifiedEmissionsGhst: 0,
+      };
+
+      currentEmissions = parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked));
+      modifiedEmissions = currentEmissions;
+      currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
+      modifiedEmissionsGhst = currentEmissionsGhst;
+      cumulativeEmissions.currentEmissions += currentEmissions;
+      cumulativeEmissions.modifiedEmissions += modifiedEmissions;
+      cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
+      cumulativeEmissions.modifiedEmissionsGhst += modifiedEmissionsGhst;
+
       rows.push({
         id: 'GHST',
         contract: 'https://polygonscan.com/address/0xa02d547512bb90002807499f05495fe9c4c3943f',
@@ -176,10 +192,10 @@ class FrensRates extends Component {
       emissionsRows.push({
         id: 'GHST',
         contract: 'https://polygonscan.com/address/0xa02d547512bb90002807499f05495fe9c4c3943f',
-        currentEmissions: parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked)).toLocaleString(),
-        currentEmissionsGhst: (parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked)) * this.state.rates.ghstFrenPrice).toLocaleString(),
-        modifiedEmissions: parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked)).toLocaleString(),
-        modifiedEmissionsGhst: (parseInt(ethers.utils.formatEther(this.state.rates.ghstStaked)) * this.state.rates.ghstFrenPrice).toLocaleString()
+        currentEmissions: currentEmissions.toLocaleString(),
+        currentEmissionsGhst: currentEmissionsGhst.toLocaleString(),
+        modifiedEmissions: modifiedEmissions.toLocaleString(),
+        modifiedEmissionsGhst: modifiedEmissionsGhst.toLocaleString()
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstQuickSupply));
@@ -191,6 +207,10 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
       currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
       modifiedEmissionsGhst = modifiedEmissions * this.state.rates.ghstFrenPrice;
+      cumulativeEmissions.currentEmissions += currentEmissions;
+      cumulativeEmissions.modifiedEmissions += modifiedEmissions;
+      cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
+      cumulativeEmissions.modifiedEmissionsGhst += modifiedEmissionsGhst;
 
       rows.push({
         id: 'QUICKSWAP GHST QUICK LP',
@@ -223,6 +243,10 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
       currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
       modifiedEmissionsGhst = modifiedEmissions * this.state.rates.ghstFrenPrice;
+      cumulativeEmissions.currentEmissions += currentEmissions;
+      cumulativeEmissions.modifiedEmissions += modifiedEmissions;
+      cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
+      cumulativeEmissions.modifiedEmissionsGhst += modifiedEmissionsGhst;
 
       rows.push({
         id: 'QUICKSWAP GHST USDC LP',
@@ -255,6 +279,10 @@ class FrensRates extends Component {
       modifiedEmissions = totalSupply * modifiedRewards;
       currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
       modifiedEmissionsGhst = modifiedEmissions * this.state.rates.ghstFrenPrice;
+      cumulativeEmissions.currentEmissions += currentEmissions;
+      cumulativeEmissions.modifiedEmissions += modifiedEmissions;
+      cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
+      cumulativeEmissions.modifiedEmissionsGhst += modifiedEmissionsGhst;
 
       rows.push({
         id: 'QUICKSWAP GHST WETH LP',
@@ -315,6 +343,8 @@ class FrensRates extends Component {
           <div style={{ height: '400px', width: '100%' }}>
             <DataGrid rows={emissionsRows} columns={emissionsColumns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
+          <p>Cumulative Current Daily Emissions: {parseInt(cumulativeEmissions.currentEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.currentEmissionsGhst).toLocaleString()} GHST</p>
+          <p>Cumulative Modified Daily Emissions: {parseInt(cumulativeEmissions.modifiedEmissions).toLocaleString()} FRENS which equates to {parseInt(cumulativeEmissions.modifiedEmissionsGhst).toLocaleString()} GHST</p>
         </div>
       );
     } else {
