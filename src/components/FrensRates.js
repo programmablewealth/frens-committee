@@ -311,6 +311,7 @@ class FrensRates extends Component {
             <DataGrid rows={rows} columns={columns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
           <h2>Daily Emissions</h2>
+          <p>FRENS Emissions are calculated in GHST by assuming the FRENS can be converted to tickets and sold at the current <a href='https://aavegotchistats.com/floor'>ticket floor price</a> of {(this.state.rates.ghstFrenPrice).toFixed(6)} GHST / fren</p>
           <div style={{ height: '400px', width: '100%' }}>
             <DataGrid rows={emissionsRows} columns={emissionsColumns} pageSize={100} density="compact" disableSelectionOnClick="true" />
           </div>
