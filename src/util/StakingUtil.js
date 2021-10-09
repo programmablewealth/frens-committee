@@ -25,6 +25,30 @@ export const retrieveStakingStats = async () => {
   return stats.data.data.stakingStats[0];
 };
 
+export const retrieveStakingStatsWithBlock = async (block) => {
+  let query = `{
+    stakingStats(first: 1, block: { number: ${block} }) {
+      id
+      circulatingFrens
+      circulatingTickets
+      totalMintedTickets
+      totalBurnedTicketsForRaffles
+      totalUniqueStaker
+  		totalMintedFrens
+      totalBurnedTicketsForRaffles
+    }
+  }`;
+
+  const stats = await axios.post(
+    'https://api.thegraph.com/subgraphs/name/froid1911/aavegotchi-subgraph-alpha',
+    {
+      query: query
+    }
+  );
+
+  return stats.data.data.stakingStats[0];
+};
+
 const stakingEntrantsQuery = (skip) => {
   let query = `{
     entrants(
