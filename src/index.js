@@ -6,6 +6,8 @@ import reportWebVitals from './reportWebVitals';
 import TokenPrices from './components/TokenPrices';
 import FrensRates from './components/FrensRates';
 import Ownership from './components/Ownership';
+import StakingStats from './components/StakingStats';
+import FrensLeaderboard from './components/FrensLeaderboard';
 
 import {
   BrowserRouter as Router,
@@ -20,12 +22,17 @@ ReactDOM.render(
     <Router>
       <div>
         <h1>Aavegotchi Frens Taaskforce Analytics</h1>
+        <StakingStats />
         <div>
-          <a href="/">Frens Rates</a> <a href="/supply">Frens Supply</a>
+          <a href="/">Rates</a> <a href="/leaderboard">Leaderboard</a> {/*<a href="/supply">Frens Supply</a>*/}
         </div>
         <Switch>
           <Route path="/supply">
             <Ownership />
+          </Route>
+
+          <Route path="/leaderboard">
+            <FrensLeaderboard />
           </Route>
 
           <Route path="/">
