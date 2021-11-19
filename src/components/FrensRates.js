@@ -56,9 +56,15 @@ class FrensRates extends Component {
   }
 
   async componentDidMount() {
-    let ghstWethRate = await this.stakingContract.methods.ghstWethRate().call();
-    let ghstUsdcRate = await this.stakingContract.methods.ghstUsdcRate().call();
-    let ghstQuickRate = await this.stakingContract.methods.poolTokensRate().call();
+    let poolRatesInEpoch = await this.stakingContract.methods.poolRatesInEpoch(0).call()
+      .catch((err) => {
+        console.log('error retrieving ghstWethRate', err);
+      });
+    console.log('poolRatesInEpoch', poolRatesInEpoch);
+
+    let ghstQuickRate = parseInt(poolRatesInEpoch[1].rate);
+    let ghstUsdcRate = parseInt(poolRatesInEpoch[2].rate);
+    let ghstWethRate = parseInt(poolRatesInEpoch[3].rate);
 
     let ghstQuickReserves = await this.ghstQuickPairContract.methods.getReserves().call();
     let ghstQuickSupply = await this.ghstQuickPairContract.methods.totalSupply().call();
@@ -361,6 +367,8 @@ class FrensRates extends Component {
         totalSupply: totalSupply.toLocaleString(),
         ghstPerUnit: ghstPerUnit.toLocaleString(),
       });
+
+      console.log(rows);
 
       return (
         <div>

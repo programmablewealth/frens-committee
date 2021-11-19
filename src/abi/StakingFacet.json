@@ -3,6 +3,19 @@
       "anonymous": false,
       "inputs": [
         {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "_newEpoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "EpochIncreased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
           "indexed": false,
           "internalType": "uint256",
           "name": "_newRate",
@@ -23,6 +36,25 @@
         }
       ],
       "name": "GhstWethRate",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_poolAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "_epoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "PoolAddedInEpoch",
       "type": "event"
     },
     {
@@ -62,6 +94,37 @@
         }
       ],
       "name": "RateManagerRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_poolAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "_epoch",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "StakeInEpoch",
       "type": "event"
     },
     {
@@ -127,6 +190,50 @@
       "type": "event"
     },
     {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        }
+      ],
+      "name": "UserMigrated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "_poolAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "_epoch",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "WithdrawInEpoch",
+      "type": "event"
+    },
+    {
       "inputs": [
         {
           "internalType": "address[]",
@@ -156,6 +263,24 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_epoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "bumpEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -192,6 +317,19 @@
       "name": "convertTickets",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "currentEpoch",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -240,6 +378,57 @@
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_poolAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_epoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "getPoolInfo",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "_poolAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_poolReceiptToken",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_rate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "_poolName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "_poolUrl",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct StakingFacet.PoolInput",
+          "name": "_poolInfo",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "getStkGhstUsdcToken",
       "outputs": [
@@ -266,29 +455,62 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "ghstUsdcRate",
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        }
+      ],
+      "name": "hasMigrated",
       "outputs": [
         {
-          "internalType": "uint256",
+          "internalType": "bool",
           "name": "",
-          "type": "uint256"
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "ghstWethRate",
-      "outputs": [
+      "inputs": [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
+          "components": [
+            {
+              "internalType": "address",
+              "name": "_poolAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_poolReceiptToken",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_rate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "_poolName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "_poolUrl",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct StakingFacet.PoolInput[]",
+          "name": "_pools",
+          "type": "tuple[]"
         }
       ],
-      "stateMutability": "view",
+      "name": "initiateEpoch",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -314,28 +536,56 @@
       "inputs": [
         {
           "internalType": "address[]",
-          "name": "_stakers",
+          "name": "_accounts",
           "type": "address[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_frens",
-          "type": "uint256[]"
         }
       ],
-      "name": "migrateFrens",
+      "name": "migrateToV2",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "poolTokensRate",
-      "outputs": [
+      "inputs": [
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "_epoch",
           "type": "uint256"
+        }
+      ],
+      "name": "poolRatesInEpoch",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "poolAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "poolName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "poolUrl",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct StakingFacet.PoolStakedOutput[]",
+          "name": "_rates",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -350,52 +600,6 @@
         }
       ],
       "name": "removeRateManagers",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_ghstUsdcPoolToken",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_stkGhstUsdcToken",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_ghstUsdcRate",
-          "type": "uint256"
-        }
-      ],
-      "name": "setGhstUsdcToken",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_ghstWethPoolToken",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_stkGhstWethToken",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_ghstWethRate",
-          "type": "uint256"
-        }
-      ],
-      "name": "setGhstWethToken",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -435,6 +639,24 @@
         }
       ],
       "name": "stakeGhstWethPoolTokens",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_poolContractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "stakeIntoPool",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -490,18 +712,97 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_old",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_new",
+          "name": "_account",
           "type": "address"
         }
       ],
-      "name": "switchFrens",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "stakedInCurrentEpoch",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "poolAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "poolName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "poolUrl",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct StakingFacet.PoolStakedOutput[]",
+          "name": "_staked",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_epoch",
+          "type": "uint256"
+        }
+      ],
+      "name": "stakedInEpoch",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "poolAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "poolName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "poolUrl",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "rate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "amount",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct StakingFacet.PoolStakedOutput[]",
+          "name": "_staked",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -526,12 +827,44 @@
     {
       "inputs": [
         {
-          "internalType": "address[]",
-          "name": "_accounts",
-          "type": "address[]"
+          "internalType": "uint256",
+          "name": "_currentEpoch",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "_poolAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "_poolReceiptToken",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "_rate",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "_poolName",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "_poolUrl",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct StakingFacet.PoolInput[]",
+          "name": "_newPools",
+          "type": "tuple[]"
         }
       ],
-      "name": "updateAccounts",
+      "name": "updateRates",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -539,38 +872,36 @@
     {
       "inputs": [
         {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        }
+      ],
+      "name": "userEpoch",
+      "outputs": [
+        {
           "internalType": "uint256",
-          "name": "_newRate",
+          "name": "",
           "type": "uint256"
         }
       ],
-      "name": "updateGhstUsdcRate",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [
         {
-          "internalType": "uint256",
-          "name": "_newRate",
-          "type": "uint256"
-        }
-      ],
-      "name": "updateGhstWethRate",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
+          "internalType": "address",
+          "name": "_poolContractAddress",
+          "type": "address"
+        },
         {
           "internalType": "uint256",
-          "name": "_newRate",
+          "name": "_amount",
           "type": "uint256"
         }
       ],
-      "name": "updatePoolTokensRate",
+      "name": "withdrawFromPool",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
