@@ -56,7 +56,7 @@ class FrensRates extends Component {
   }
 
   async componentDidMount() {
-    let poolRatesInEpoch = await this.stakingContract.methods.poolRatesInEpoch(0).call()
+    let poolRatesInEpoch = await this.stakingContract.methods.poolRatesInEpoch(1).call()
       .catch((err) => {
         console.log('error retrieving ghstWethRate', err);
       });
