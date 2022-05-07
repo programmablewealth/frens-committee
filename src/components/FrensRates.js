@@ -45,6 +45,7 @@ class FrensRates extends Component {
     this.uniswapGHSTEthPairContract = new ethers.Contract('0xab659dee3030602c1af8c29d146facd4aed6ec85', uniswapV2PairAbi, ethProvider);
 
     this.ghstContract = new maticPOSClient.web3Client.web3.eth.Contract(ghstAbi, '0x385eeac5cb85a38a9a07a70c73e0a3271cfb54a7');
+    this.wapGHSTContract = new maticPOSClient.web3Client.web3.eth.Contract(ghstAbi, '0x73958d46B7aA2bc94926d8a215Fa560A5CdCA3eA');
 
     console.log(this.aavegotchiContract);
     console.log(this.stakingContract);
@@ -56,15 +57,19 @@ class FrensRates extends Component {
   }
 
   async componentDidMount() {
-    let poolRatesInEpoch = await this.stakingContract.methods.poolRatesInEpoch(1).call()
+    let epoch = 3;
+    let poolRatesInEpoch = await this.stakingContract.methods.poolRatesInEpoch(epoch).call()
       .catch((err) => {
         console.log('error retrieving ghstWethRate', err);
       });
     console.log('poolRatesInEpoch', poolRatesInEpoch);
 
+    let ghstRate = parseInt(poolRatesInEpoch[0].rate);
     let ghstQuickRate = parseInt(poolRatesInEpoch[1].rate);
     let ghstUsdcRate = parseInt(poolRatesInEpoch[2].rate);
     let ghstWethRate = parseInt(poolRatesInEpoch[3].rate);
+    let ghstMaticRate = parseInt(poolRatesInEpoch[4].rate);
+    let wapGHSTRate = parseInt(poolRatesInEpoch[5].rate);
 
     let ghstQuickReserves = await this.ghstQuickPairContract.methods.getReserves().call();
     let ghstQuickSupply = await this.ghstQuickPairContract.methods.totalSupply().call();
@@ -76,6 +81,7 @@ class FrensRates extends Component {
     let ghstWethSupply = await this.ghstWethPairContract.methods.totalSupply().call();
 
     let ghstStaked = await this.ghstContract.methods.balanceOf('0xa02d547512bb90002807499f05495fe9c4c3943f').call();
+    let wapGHSTStaked = await this.wapGHSTContract.methods.balanceOf('0xa02d547512bb90002807499f05495fe9c4c3943f').call();
 
     let ghstEthUniswapReserves = await this.uniswapGHSTEthPairContract.getReserves();
     let ghstEthUniswapSupply = await this.uniswapGHSTEthPairContract.totalSupply();
@@ -96,7 +102,7 @@ class FrensRates extends Component {
           .then((ghstFrenPrice) => {
             console.log('ghstFrenPrice', ghstFrenPrice);
             // let usdFrenPrice = ghstFrenPrice;
-            this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate: 1, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked, ghstEthUniswapReserves, ghstEthUniswapSupply, ghstMaticReserves, ghstMaticSupply, ghstFrenPrice, tokenPrices } });
+            this.setState({ rates: { ghstWethRate, ghstUsdcRate, ghstQuickRate, ghstRate, ghstMaticRate, wapGHSTRate, ghstQuickReserves, ghstUsdcReserves, ghstWethReserves, ghstQuickSupply, ghstUsdcSupply, ghstWethSupply, ghstStaked, wapGHSTStaked, ghstEthUniswapReserves, ghstEthUniswapSupply, ghstMaticReserves, ghstMaticSupply, ghstFrenPrice, tokenPrices } });
           });
       });
   }
@@ -212,6 +218,39 @@ class FrensRates extends Component {
       emissionsRows.push({
         id: 'GHST',
         contract: 'https://polygonscan.com/address/0xa02d547512bb90002807499f05495fe9c4c3943f',
+        currentEmissions: currentEmissions.toLocaleString(),
+        currentEmissionsGhst: currentEmissionsGhst.toLocaleString(),
+        modifiedEmissions: modifiedEmissions.toLocaleString(),
+        modifiedEmissionsGhst: modifiedEmissionsGhst.toLocaleString(),
+        currentEmissionsUsd: currentEmissionsUsd.toLocaleString(),
+        modifiedEmissionsUsd: modifiedEmissionsUsd.toLocaleString()
+      });
+
+      currentEmissions = parseInt(ethers.utils.formatEther(this.state.rates.wapGHSTStaked));
+      modifiedEmissions = currentEmissions;
+      currentEmissionsGhst = parseInt(currentEmissions * this.state.rates.ghstFrenPrice);
+      modifiedEmissionsGhst = currentEmissionsGhst;
+      currentEmissionsUsd = parseInt(currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      modifiedEmissionsUsd = parseInt(modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      cumulativeEmissions.currentEmissions += currentEmissions;
+      cumulativeEmissions.modifiedEmissions += modifiedEmissions;
+      cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
+      cumulativeEmissions.modifiedEmissionsGhst += modifiedEmissionsGhst;
+
+      rows.push({
+        id: 'wapGHST',
+        contract: 'https://polygonscan.com/address/0x73958d46b7aa2bc94926d8a215fa560a5cdca3ea',
+        currentRewards: this.state.rates.wapGHSTRate,
+        reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.wapGHSTStaked)).toLocaleString(),
+        ghstPerUnit: 1,
+        realFrensRate: (1).toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
+        targetFrensRate: (1).toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
+        modifiedRewards: (1).toLocaleString(),
+      });
+
+      emissionsRows.push({
+        id: 'wapGHST',
+        contract: 'https://polygonscan.com/address/0x73958d46b7aa2bc94926d8a215fa560a5cdca3ea',
         currentEmissions: currentEmissions.toLocaleString(),
         currentEmissionsGhst: currentEmissionsGhst.toLocaleString(),
         modifiedEmissions: modifiedEmissions.toLocaleString(),
@@ -342,17 +381,54 @@ class FrensRates extends Component {
         modifiedEmissionsUsd: modifiedEmissionsUsd.toLocaleString()
       });
 
+
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticSupply));
       ghstPerUnit = (parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve1)) * 2) / totalSupply;
+      realFrensRate = parseFloat(this.state.rates.ghstMaticRate) / ghstPerUnit;
+      targetFrensRate = 1.3;
+      modifiedRewards = targetFrensRate * ghstPerUnit;
 
       rows.push({
         id: 'SUSHISWAP GHST MATIC LP',
         contract: 'https://analytics-polygon.sushi.com/pairs/0xf69e93771f11aecd8e554aa165c3fe7fd811530c',
-        currentRewards: 0,
+        currentRewards: parseFloat(this.state.rates.ghstMaticRate).toLocaleString(),
         reserve1: parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve1)).toLocaleString(),
         reserve2: parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve0)).toLocaleString(),
         totalSupply: totalSupply.toLocaleString(),
         ghstPerUnit: ghstPerUnit.toLocaleString(),
+        realFrensRate: realFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
+        targetFrensRate: targetFrensRate.toLocaleString(undefined,{style: 'percent', minimumFractionDigits:2}),
+        modifiedRewards: modifiedRewards.toLocaleString(),
+      });
+
+
+      totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticSupply));
+      ghstPerUnit = (parseFloat(ethers.utils.formatEther(this.state.rates.ghstMaticReserves._reserve1)) * 2) / totalSupply;
+      realFrensRate = parseFloat(this.state.rates.ghstMaticRate) / ghstPerUnit;
+      targetFrensRate = 1.3;
+      modifiedRewards = targetFrensRate * ghstPerUnit;
+      currentEmissions = totalSupply * parseFloat(this.state.rates.ghstMaticRate);
+      modifiedEmissions = totalSupply * modifiedRewards;
+      currentEmissionsGhst = currentEmissions * this.state.rates.ghstFrenPrice;
+      modifiedEmissionsGhst = modifiedEmissions * this.state.rates.ghstFrenPrice;
+      currentEmissionsUsd = parseInt(currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      modifiedEmissionsUsd = parseInt(modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd);
+      cumulativeEmissions.currentEmissions += currentEmissions;
+      cumulativeEmissions.modifiedEmissions += modifiedEmissions;
+      cumulativeEmissions.currentEmissionsGhst += currentEmissionsGhst;
+      cumulativeEmissions.modifiedEmissionsGhst += modifiedEmissionsGhst;
+      cumulativeEmissions.currentEmissionsUsd = cumulativeEmissions.currentEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd;
+      cumulativeEmissions.modifiedEmissionsUsd = cumulativeEmissions.modifiedEmissionsGhst * this.state.rates.tokenPrices.aavegotchi.usd;
+
+      emissionsRows.push({
+        id: 'SUSHISWAP GHST MATIC LP',
+        contract: 'https://analytics-polygon.sushi.com/pairs/0xf69e93771f11aecd8e554aa165c3fe7fd811530c',
+        currentEmissions: parseInt(currentEmissions).toLocaleString(),
+        modifiedEmissions: parseInt(modifiedEmissions).toLocaleString(),
+        currentEmissionsGhst: parseInt(currentEmissionsGhst).toLocaleString(),
+        modifiedEmissionsGhst: parseInt(modifiedEmissionsGhst).toLocaleString(),
+        currentEmissionsUsd: currentEmissionsUsd.toLocaleString(),
+        modifiedEmissionsUsd: modifiedEmissionsUsd.toLocaleString()
       });
 
       totalSupply = parseFloat(ethers.utils.formatEther(this.state.rates.ghstEthUniswapSupply));
